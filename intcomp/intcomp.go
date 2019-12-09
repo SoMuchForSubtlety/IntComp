@@ -1,7 +1,9 @@
 // Package intcomp provides an easy to use implementation of the Intcode computer as described by Advent of Code 2019
 package intcomp
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Computer represents an Intcode Computer
 type Computer struct {
@@ -25,46 +27,38 @@ func NewComputer(memory []int, memSize int, in, out chan int) *Computer {
 	return &c
 }
 
+func (c *Computer) getValue(i int) (v int) {
+	if len(c.memory) > c.pointer+i {
+		v = c.memory[c.pointer+i]
+		if c.memory[c.pointer] > 99 {
+			mode := (c.memory[c.pointer] / pow(10, 1+i)) % 10
+			switch mode {
+			case 1:
+				v = c.pointer + i
+			case 2:
+				v = c.relativeBase + v
+			}
+		}
+	}
+	return
+}
+
+func pow(i, n int) (res int) {
+	res = i
+	for j := 1; j < n; j++ {
+		res *= i
+	}
+	return
+}
+
 func (c *Computer) getValues() (v1, v2, v3, v4 int) {
 	v1 = c.memory[c.pointer]
-	if len(c.memory) > c.pointer+1 {
-		v2 = c.memory[c.pointer+1]
+	if v1 > 99 {
+		v1 = v1 % 100
 	}
-	if len(c.memory) > c.pointer+2 {
-		v3 = c.memory[c.pointer+2]
-	}
-	if len(c.memory) > c.pointer+3 {
-		v4 = c.memory[c.pointer+3]
-	}
-
-	if c.memory[c.pointer] > 99 {
-		val := v1
-		v1 = val % 100
-		val /= 100
-		if len(c.memory) > c.pointer+1 {
-			if val%10 == 1 {
-				v2 = c.pointer + 1
-			} else if val%10 == 2 {
-				v2 = c.relativeBase + v2
-			}
-		}
-		val /= 10
-		if len(c.memory) > c.pointer+2 {
-			if val%10 == 1 {
-				v3 = c.pointer + 2
-			} else if val%10 == 2 {
-				v3 = c.relativeBase + v3
-			}
-		}
-		val /= 10
-		if len(c.memory) > c.pointer+3 {
-			if val%10 == 1 {
-				v4 = c.pointer + 3
-			} else if val%10 == 2 {
-				v4 = c.relativeBase + v4
-			}
-		}
-	}
+	v2 = c.getValue(1)
+	v3 = c.getValue(2)
+	v4 = c.getValue(3)
 	return
 }
 

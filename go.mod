@@ -1,3 +1,3 @@
-module github.com/SoMuchForSubtlety/IntComp
+module github.com/SoMuchForSubtlety/intcomp
 
 go 1.13
