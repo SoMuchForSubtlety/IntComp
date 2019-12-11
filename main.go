@@ -47,7 +47,7 @@ func main() {
 		}
 	}()
 
-	err := intcomp.NewComputer(initialMemory, *memorySize, in, out).Run()
+	err := intcomp.NewComputer(initialMemory, *memorySize, in, out, nil).Run()
 	if err != nil {
 		fmt.Println(err)
 	}

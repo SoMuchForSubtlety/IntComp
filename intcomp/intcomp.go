@@ -12,17 +12,18 @@ type Computer struct {
 	relativeBase int
 	Input        chan int
 	Output       chan int
+	Done         chan int
 }
 
 // NewComputer creates a new Intcode Computer
 // in and out are the input / output used for intcodes 3 and 4. They are both blocking!
 // Memsize represents your desired memory size for the computer.
 // The computer does not gracefully handle index out of range errors!
-func NewComputer(memory []int, memSize int, in, out chan int) *Computer {
+func NewComputer(memory []int, memSize int, in, out, done chan int) *Computer {
 	if memSize < len(memory) {
 		memSize = len(memory)
 	}
-	c := Computer{memory: make([]int, memSize), Input: in, Output: out}
+	c := Computer{memory: make([]int, memSize), Input: in, Output: out, Done: done}
 	copy(c.memory, memory)
 	return &c
 }
@@ -75,6 +76,9 @@ func (c *Computer) executeOpcode() (bool, error) {
 	opcode, v1, v2, v3 := c.getValues()
 	switch opcode {
 	case 99:
+		if c.Done != nil {
+			c.Done <- 0
+		}
 		return true, nil
 	case 1:
 		c.code1(v3, v1, v2)
@@ -95,6 +99,9 @@ func (c *Computer) executeOpcode() (bool, error) {
 	case 9:
 		c.code9(v1)
 	default:
+		if c.Done != nil {
+			c.Done <- 1
+		}
 		return true, fmt.Errorf("unexpected opcode %d at memory position %d", opcode, c.pointer)
 	}
 	return false, nil
