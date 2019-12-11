@@ -10,8 +10,8 @@ type Computer struct {
 	memory       []int
 	pointer      int
 	relativeBase int
-	input        chan int
-	output       chan int
+	Input        chan int
+	Output       chan int
 }
 
 // NewComputer creates a new Intcode Computer
@@ -22,7 +22,7 @@ func NewComputer(memory []int, memSize int, in, out chan int) *Computer {
 	if memSize < len(memory) {
 		memSize = len(memory)
 	}
-	c := Computer{memory: make([]int, memSize), input: in, output: out}
+	c := Computer{memory: make([]int, memSize), Input: in, Output: out}
 	copy(c.memory, memory)
 	return &c
 }
@@ -111,12 +111,12 @@ func (c *Computer) code2(target, a, b int) {
 }
 
 func (c *Computer) code3(target int) {
-	c.memory[target] = <-c.input
+	c.memory[target] = <-c.Input
 	c.pointer += 2
 }
 
 func (c *Computer) code4(target int) {
-	c.output <- c.memory[target]
+	c.Output <- c.memory[target]
 	c.pointer += 2
 }
 
