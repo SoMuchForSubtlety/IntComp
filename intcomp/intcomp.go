@@ -9,6 +9,7 @@ import (
 type Computer struct {
 	memory       []int
 	pointer      int
+	memSize      int
 	relativeBase int
 	Input        chan int
 	Output       chan int
@@ -25,14 +26,16 @@ func NewComputer(memory []int, memSize int, in, out, done chan int) *Computer {
 	}
 	c := Computer{memory: make([]int, memSize), Input: in, Output: out, Done: done}
 	copy(c.memory, memory)
+	c.memSize = len(c.memory)
 	return &c
 }
 
 func (c *Computer) getValue(i int) (v int) {
-	if len(c.memory) > c.pointer+i {
+	if c.memSize > c.pointer+i {
 		v = c.memory[c.pointer+i]
-		if c.memory[c.pointer] > 99 {
-			mode := (c.memory[c.pointer] / pow(10, 1+i)) % 10
+		opcode := c.memory[c.pointer]
+		if opcode > 99 {
+			mode := (opcode / pow(10, 1+i)) % 10
 			switch mode {
 			case 1:
 				v = c.pointer + i
